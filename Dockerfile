@@ -21,11 +21,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Create data directory
-RUN mkdir -p /app/data
-RUN chown -R nextjs:nodejs /app/data
+RUN mkdir -p /app/prisma
+RUN chown -R nextjs:nodejs /app/prisma
 
 # Copy built assets
-COPY --from=base /app/public ./public
 COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static
 COPY --from=base /app/prisma ./prisma
