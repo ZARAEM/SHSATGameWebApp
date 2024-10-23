@@ -9,6 +9,9 @@ RUN npm install
 COPY . .
 RUN npx prisma generate
 
+# Apply Prisma migrations
+RUN npx prisma migrate deploy
+
 # Build Next.js
 RUN npm run build
 
@@ -20,7 +23,7 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Create data directory
+# Create prisma directory
 RUN mkdir -p /app/prisma
 RUN chown -R nextjs:nodejs /app/prisma
 
