@@ -5,6 +5,8 @@
     "react-hooks/exhaustive-deps": "warn",
     "@next/next/no-img-element": "warn",
     "@typescript-eslint/no-empty-object-type": "off",
-    "no-var": "warn"
+    "@typescript-eslint/no-empty-interface": "off",
+    "no-var": "warn",
+    "no-unused-vars": "warn"
   }
 }
