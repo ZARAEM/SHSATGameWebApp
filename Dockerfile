@@ -1,23 +1,30 @@
 FROM node:alpine AS base
 WORKDIR /app
 
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
+# Copy source and generate Prisma Client
 COPY . .
 RUN npx prisma generate
 
+# Build Next.js
 RUN npm run build
 
+# Production image
 FROM node:alpine AS runner
 WORKDIR /app
 
+# Add system user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Create data directory
 RUN mkdir -p /app/data
 RUN chown -R nextjs:nodejs /app/data
 
+# Copy built assets
 COPY --from=base /app/public ./public
 COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static
