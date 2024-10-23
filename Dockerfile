@@ -29,6 +29,8 @@ COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static
 COPY --from=base /app/prisma ./prisma
 
+RUN chown -R nextjs:nodejs .
+
 USER nextjs
 
 EXPOSE 3000
