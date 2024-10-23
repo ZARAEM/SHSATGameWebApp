@@ -52,6 +52,7 @@ export function PostSubmissionState({
             correctAnswer={question.correctAnswer}
             selectedAnswer={studentAnswer}
             showCorrectness={true}
+            choices={question.choices}
           />
         ) : (
           <>

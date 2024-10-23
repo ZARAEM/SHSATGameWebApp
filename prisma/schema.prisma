@@ -24,4 +24,15 @@ model Question {
   correctAnswer    String
   askedInSession   Boolean @default(false)
   imageUrl         String?
+  choices          QuestionChoice[]
+}
+
+model QuestionChoice {
+  id         String   @id @default(uuid())
+  text       String
+  choiceId   String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  @@index([questionId])
 }

@@ -8,6 +8,7 @@ type MultipleChoiceProps = {
   correctAnswer?: string;
   selectedAnswer?: string;
   showCorrectness?: boolean;
+  choices?: { id: string; text: string }[];
 };
 
 export function MultipleChoice({
@@ -16,8 +17,13 @@ export function MultipleChoice({
   correctAnswer,
   selectedAnswer,
   showCorrectness = false,
+  choices = [
+    { id: "A", text: "" },
+    { id: "B", text: "" },
+    { id: "C", text: "" },
+    { id: "D", text: "" },
+  ],
 }: MultipleChoiceProps) {
-  const choices = ["A", "B", "C", "D"];
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
 
   const getBubbleStyle = (choice: string) => {
@@ -57,14 +63,14 @@ export function MultipleChoice({
     <div className="w-full max-w-md mx-auto space-y-4">
       {choices.map((choice) => (
         <button
-          key={choice}
-          onClick={() => handleSelect(choice)}
+          key={choice.id}
+          onClick={() => handleSelect(choice.id)}
           className={`flex items-center space-x-4 w-full p-4 text-left rounded-lg border-2 transition-all ${
             disabled ? "cursor-not-allowed" : "hover:border-gray-300"
           } ${
             showCorrectness
               ? "pointer-events-none"
-              : selectedId === choice
+              : selectedId === choice.id
               ? "border-primary bg-primary-foreground"
               : "border-gray-200"
           }`}
@@ -72,10 +78,10 @@ export function MultipleChoice({
         >
           <div
             className={`flex items-center justify-center w-8 h-8 rounded-full border-2 font-semibold transition-all ${getBubbleStyle(
-              choice
+              choice.id
             )}`}
           >
-            {choice}
+            {choice.id}
           </div>
         </button>
       ))}

@@ -8,4 +8,9 @@ export interface Question {
   correctAnswer: string;
   askedInSession: boolean;
   imageUrl?: string;
+  choices?: {
+    id: string;
+    text: string;
+    choiceId: string;
+  }[];
 }

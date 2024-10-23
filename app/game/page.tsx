@@ -266,6 +266,7 @@ export default function GamePage() {
                     <MultipleChoice
                       onChange={handleAnswerChange}
                       disabled={isSubmitted}
+                      choices={currentQuestion.choices}
                     />
                   ) : (
                     <GridIn

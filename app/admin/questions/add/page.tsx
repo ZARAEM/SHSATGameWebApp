@@ -1,35 +1,50 @@
-"use client"
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AdminHeader } from "@/components/admin-header";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export default function AddQuestion() {
   const [question, setQuestion] = useState({
-    text: '',
-    subject: '',
-    timeAllowed: '',
-    points: '',
-    questionType: 'multiple-choice',
-    correctAnswer: '',
-    imageUrl: '',
+    text: "",
+    subject: "",
+    timeAllowed: "",
+    points: "",
+    questionType: "multiple-choice",
+    correctAnswer: "",
+    imageUrl: "",
+    choices: [
+      { choiceId: "A", text: "" },
+      { choiceId: "B", text: "" },
+      { choiceId: "C", text: "" },
+      { choiceId: "D", text: "" },
+    ],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setQuestion(prev => ({ ...prev, [name]: value }));
+    setQuestion((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/questions', {
-        method: 'POST',
+      const response = await fetch("/api/questions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...question,
@@ -39,21 +54,27 @@ export default function AddQuestion() {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to add question');
+        throw new Error(errorData.error || "Failed to add question");
       }
-      alert('Question added successfully');
+      alert("Question added successfully");
       setQuestion({
-        text: '',
-        subject: '',
-        timeAllowed: '',
-        points: '',
-        questionType: 'multiple-choice',
-        correctAnswer: '',
-        imageUrl: '',
+        text: "",
+        subject: "",
+        timeAllowed: "",
+        points: "",
+        questionType: "multiple-choice",
+        correctAnswer: "",
+        imageUrl: "",
+        choices: [
+          { choiceId: "A", text: "" },
+          { choiceId: "B", text: "" },
+          { choiceId: "C", text: "" },
+          { choiceId: "D", text: "" },
+        ],
       });
     } catch (error) {
-      console.error('Error adding question:', error);
-      alert('Failed to add question');
+      console.error("Error adding question:", error);
+      alert("Failed to add question");
     }
   };
 
@@ -94,18 +115,55 @@ export default function AddQuestion() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="w-full mb-2">
-              {question.questionType === 'multiple-choice' ? 'Multiple Choice' : 'Grid In'}
+              {question.questionType === "multiple-choice"
+                ? "Multiple Choice"
+                : "Grid In"}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-full">
-            <DropdownMenuItem onClick={() => setQuestion(prev => ({ ...prev, questionType: 'multiple-choice' }))}>
+            <DropdownMenuItem
+              onClick={() =>
+                setQuestion((prev) => ({
+                  ...prev,
+                  questionType: "multiple-choice",
+                }))
+              }
+            >
               Multiple Choice
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setQuestion(prev => ({ ...prev, questionType: 'grid-in' }))}>
+            <DropdownMenuItem
+              onClick={() =>
+                setQuestion((prev) => ({ ...prev, questionType: "grid-in" }))
+              }
+            >
               Grid In
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {question.questionType === "multiple-choice" && (
+          <div className="space-y-2">
+            <h3 className="font-medium">Answer Choices</h3>
+            {question.choices.map((choice, index) => (
+              <div key={choice.choiceId} className="flex gap-2">
+                <div className="w-8 h-8 flex items-center justify-center border rounded-full">
+                  {choice.choiceId}
+                </div>
+                <Input
+                  value={choice.text}
+                  onChange={(e) => {
+                    const newChoices = [...question.choices];
+                    newChoices[index].text = e.target.value;
+                    setQuestion((prev) => ({ ...prev, choices: newChoices }));
+                  }}
+                  placeholder={`Choice ${choice.choiceId}`}
+                  required
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
         {question.questionType === "multiple-choice" ? (
           <Input
             name="correctAnswer"

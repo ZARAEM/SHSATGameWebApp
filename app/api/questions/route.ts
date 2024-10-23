@@ -12,6 +12,7 @@ type QuestionData = {
   correctAnswer: string;
   askedInSession: boolean;
   imageUrl?: string;
+  choices?: { text: string; choiceId: string }[];
 };
 
 function validateQuestionData(
@@ -42,9 +43,16 @@ export async function GET(request: NextRequest) {
         where: {
           askedInSession: askedInSession,
         },
+        include: {
+          choices: true,
+        },
       });
     } else {
-      questions = await prisma.question.findMany();
+      questions = await prisma.question.findMany({
+        include: {
+          choices: true,
+        },
+      });
     }
 
     return NextResponse.json(questions);
@@ -54,8 +62,6 @@ export async function GET(request: NextRequest) {
       { message: "Internal server error" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -70,13 +76,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { choices, ...questionData } = body;
+
     const newQuestion = await prisma.question.create({
       data: {
-        ...body,
-        timeAllowed: Number(body.timeAllowed),
-        points: Number(body.points),
-        imageUrl: body.imageUrl || null,
+        ...questionData,
+        timeAllowed: Number(questionData.timeAllowed),
+        points: Number(questionData.points),
+        imageUrl: questionData.imageUrl || null,
         askedInSession: false,
+        choices: {
+          create:
+            choices?.map((choice: { text: string; choiceId: string }) => ({
+              text: choice.text,
+              choiceId: choice.choiceId,
+            })) || [],
+        },
+      },
+      include: {
+        choices: true,
       },
     });
 
@@ -87,8 +105,6 @@ export async function POST(request: NextRequest) {
       { error: "Internal server error" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
