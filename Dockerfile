@@ -10,7 +10,7 @@ COPY . .
 RUN npx prisma generate
 
 # Apply Prisma migrations
-RUN npx prisma migrate deploy
+RUN npx prisma migrate reset --force
 
 # Build Next.js
 RUN npm run build
