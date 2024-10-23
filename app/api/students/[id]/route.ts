@@ -28,3 +28,22 @@ export async function PATCH(
     await prisma.$disconnect();
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = params.id;
+    await prisma.student.delete({
+      where: { id },
+    });
+    return NextResponse.json({ message: "Student deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

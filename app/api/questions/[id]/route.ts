@@ -10,13 +10,24 @@ export async function PUT(
   try {
     const id = params.id;
     const body = await request.json();
+    const { choices, ...questionData } = body;
 
     const updatedQuestion = await prisma.question.update({
-      where: { id: id },
+      where: { id },
       data: {
-        ...body,
-        timeAllowed: Number(body.timeAllowed),
-        points: Number(body.points),
+        ...questionData,
+        timeAllowed: Number(questionData.timeAllowed),
+        points: Number(questionData.points),
+        choices: {
+          deleteMany: {},
+          create: choices.map((choice: { text: string; choiceId: string }) => ({
+            text: choice.text,
+            choiceId: choice.choiceId,
+          })),
+        },
+      },
+      include: {
+        choices: true,
       },
     });
 
@@ -27,8 +38,6 @@ export async function PUT(
       { error: "Internal server error" },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

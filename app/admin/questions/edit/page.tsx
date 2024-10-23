@@ -16,6 +16,7 @@ interface Question {
   correctAnswer: string;
   imageUrl?: string;
   askedInSession: boolean;
+  choices: { id: string; text: string; choiceId: string }[];
 }
 
 export default function EditQuestions() {
@@ -49,7 +50,15 @@ export default function EditQuestions() {
       const response = await fetch(`/api/questions/${editQuestion.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editQuestion),
+        body: JSON.stringify({
+          ...editQuestion,
+          timeAllowed: Number(editQuestion.timeAllowed),
+          points: Number(editQuestion.points),
+          choices: editQuestion.choices.map((choice) => ({
+            text: choice.text,
+            choiceId: choice.choiceId,
+          })),
+        }),
       });
       if (!response.ok) throw new Error("Failed to update question");
       fetchQuestions();
