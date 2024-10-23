@@ -12,5 +12,6 @@ export interface Question {
     id: string;
     text: string;
     choiceId: string;
+    questionId: string;
   }[];
 }
