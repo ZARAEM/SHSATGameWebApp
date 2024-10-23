@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Student {
+  id    String @id @default(uuid())
+  name  String
+  score Int @default(0)
+  teamNumber Int?
+}
+
+model Question {
+  id               String  @id @default(uuid())
+  text             String
+  subject          String
+  timeAllowed      Int
+  points           Int
+  questionType     String
+  correctAnswer    String
+  askedInSession   Boolean @default(false)
+  imageUrl         String?
+}
