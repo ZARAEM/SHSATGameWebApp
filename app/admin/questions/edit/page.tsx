@@ -5,6 +5,12 @@ import { AdminHeader } from "@/components/admin-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface Question {
   id: string;
@@ -148,19 +154,77 @@ export default function EditQuestions() {
                   className="mb-2"
                   placeholder="Points"
                 />
-                <Input
-                  name="questionType"
-                  value={editQuestion?.questionType}
-                  onChange={handleChange}
-                  className="mb-2"
-                  placeholder="Question Type"
-                />
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="w-full mb-2">
+                      {editQuestion?.questionType === "multiple-choice"
+                        ? "Multiple Choice"
+                        : "Grid In"}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setEditQuestion((prev) =>
+                          prev
+                            ? { ...prev, questionType: "multiple-choice" }
+                            : null
+                        )
+                      }
+                    >
+                      Multiple Choice
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setEditQuestion((prev) =>
+                          prev ? { ...prev, questionType: "grid-in" } : null
+                        )
+                      }
+                    >
+                      Grid In
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {editQuestion?.questionType === "multiple-choice" && (
+                  <div className="space-y-2 mb-4">
+                    <h3 className="font-medium">Answer Choices</h3>
+                    {editQuestion.choices.map((choice, index) => (
+                      <div
+                        key={choice.id || choice.choiceId}
+                        className="flex gap-2"
+                      >
+                        <div className="w-8 h-8 flex items-center justify-center border rounded-full">
+                          {choice.choiceId}
+                        </div>
+                        <Input
+                          value={choice.text}
+                          onChange={(e) => {
+                            const newChoices = [...editQuestion.choices];
+                            newChoices[index].text = e.target.value;
+                            setEditQuestion((prev) =>
+                              prev ? { ...prev, choices: newChoices } : null
+                            );
+                          }}
+                          placeholder={`Choice ${choice.choiceId}`}
+                          required
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <Input
                   name="correctAnswer"
                   value={editQuestion?.correctAnswer}
                   onChange={handleChange}
                   className="mb-2"
-                  placeholder="Correct Answer"
+                  placeholder={
+                    editQuestion?.questionType === "multiple-choice"
+                      ? "Correct Answer (A, B, C, D)"
+                      : "Correct Answer (5 characters)"
+                  }
                 />
                 <Input
                   name="imageUrl"
@@ -187,6 +251,20 @@ export default function EditQuestions() {
                 <p>Time Allowed: {question.timeAllowed} seconds</p>
                 <p>Points: {question.points}</p>
                 <p>Type: {question.questionType}</p>
+                {question.questionType === "multiple-choice" && (
+                  <div className="mt-2">
+                    <p className="font-medium">Choices:</p>
+                    {question.choices.map((choice) => (
+                      <p key={choice.id || choice.choiceId}>
+                        {choice.choiceId}: {choice.text}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                <p>Correct Answer: {question.correctAnswer}</p>
+                <p>
+                  Asked In Session: {question.askedInSession ? "Yes" : "No"}
+                </p>
                 <p>Correct Answer: {question.correctAnswer}</p>
                 <p>
                   Asked In Session: {question.askedInSession ? "Yes" : "No"}
