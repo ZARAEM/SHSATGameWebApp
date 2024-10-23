@@ -7,10 +7,10 @@ RUN npm install
 
 # Copy source and generate Prisma Client
 COPY . .
-RUN npx prisma generate
 
-# Apply Prisma migrations
-RUN npx prisma migrate reset --force
+# Generate Prisma Client and initialize database
+RUN npx prisma generate
+RUN npx prisma db push --accept-data-loss
 
 # Build Next.js
 RUN npm run build
