@@ -6,7 +6,7 @@ import { Student } from "@/types/student";
 import { Question } from "@/types/question";
 import { MultipleChoice } from "@/components/multiple-choice";
 import { GridIn } from "@/components/grid-in";
-import { StudentScoreboard } from "@/components/student-scoreboard";
+import { TeamScoreboard } from "@/components/team-scoreboard";
 import Link from "next/link";
 import { PostSubmissionState } from "@/components/post-submission-state";
 
@@ -26,6 +26,10 @@ export default function GamePage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [showTeams, setShowTeams] = useState(false);
+  const [team1, setTeam1] = useState<Student[]>([]);
+  const [team2, setTeam2] = useState<Student[]>([]);
+  const [currentTeam, setCurrentTeam] = useState<1 | 2>(1);
 
   const fetchFromAPI = async <T,>(
     url: string,
@@ -59,6 +63,28 @@ export default function GamePage() {
   };
 
   useEffect(() => {
+    const checkTeamMode = async () => {
+      try {
+        const response = await fetch("/api/teams");
+        const teamsExist = response.status !== 404;
+        setShowTeams(teamsExist);
+
+        if (teamsExist) {
+          const sortedStudents = [...students].sort(
+            (a, b) => b.score - a.score
+          );
+          const midPoint = Math.ceil(sortedStudents.length / 2);
+          setTeam1(sortedStudents.slice(0, midPoint));
+          setTeam2(sortedStudents.slice(midPoint));
+          setCurrentStudentIndex(0);
+        }
+      } catch (error) {
+        console.error("Error checking team mode:", error);
+        setShowTeams(false);
+      }
+    };
+
+    checkTeamMode();
     fetchStudents();
     fetchQuestions().then((newQuestions) => {
       setQuestions(newQuestions);
@@ -130,18 +156,30 @@ export default function GamePage() {
     );
 
     if (isCorrect) {
-      const currentStudent = students[currentStudentIndex];
+      const currentStudent = showTeams
+        ? currentTeam === 1
+          ? team1[currentStudentIndex]
+          : team2[currentStudentIndex]
+        : students[currentStudentIndex];
       await updateStudentScore(currentStudent, currentQuestion.points);
     }
 
     await markQuestionAsAsked(currentQuestion.id);
 
-    const nextIndex = (currentStudentIndex + 1) % students.length;
-    setCurrentStudentIndex(nextIndex);
+    if (showTeams) {
+      const currentTeamStudents = currentTeam === 1 ? team1 : team2;
+      if (currentStudentIndex >= currentTeamStudents.length - 1) {
+        setCurrentTeam(currentTeam === 1 ? 2 : 1);
+        setCurrentStudentIndex(0);
+      } else {
+        setCurrentStudentIndex(currentStudentIndex + 1);
+      }
+    } else {
+      setCurrentStudentIndex((currentStudentIndex + 1) % students.length);
+    }
 
     setIsAnswering(false);
     setIsSubmitted(true);
-    console.log(`Correct answer: ${currentQuestion.correctAnswer}`);
   };
 
   const handleAnswerChange = (answer: string) => {
@@ -192,6 +230,14 @@ export default function GamePage() {
     setQuestionsLeft(questions.length - 1);
   };
 
+  const getCurrentStudentName = () => {
+    if (showTeams) {
+      const currentTeamStudents = currentTeam === 1 ? team1 : team2;
+      return currentTeamStudents[currentStudentIndex]?.name;
+    }
+    return students[currentStudentIndex]?.name;
+  };
+
   return (
     <div className="flex min-h-screen">
       <div className="flex flex-col flex-grow">
@@ -231,7 +277,8 @@ export default function GamePage() {
                   <div className="flex items-center gap-2">
                     <span className="text-xl">Current Student:</span>
                     <span className="text-xl font-semibold">
-                      {students[currentStudentIndex]?.name}
+                      {getCurrentStudentName()}
+                      {showTeams && ` (Team ${currentTeam})`}
                     </span>
                   </div>
                 )}
@@ -288,7 +335,7 @@ export default function GamePage() {
         </div>
       </div>
       <div className="w-80">
-        <StudentScoreboard students={students} />
+        <TeamScoreboard students={students} showTeams={showTeams} />
       </div>
     </div>
   );

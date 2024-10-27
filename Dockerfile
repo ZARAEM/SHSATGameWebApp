@@ -1,6 +1,8 @@
 FROM node:alpine AS base
 WORKDIR /app
 
+RUN apk add --no-cache sqlite
+
 # Install dependencies
 COPY package*.json ./
 RUN npm install
@@ -10,7 +12,6 @@ COPY . .
 
 # Generate Prisma Client and initialize database
 RUN npx prisma generate
-RUN npx prisma db push --accept-data-loss
 
 # Build Next.js
 RUN npm run build
@@ -18,6 +19,8 @@ RUN npm run build
 # Production image
 FROM node:alpine AS runner
 WORKDIR /app
+
+RUN apk add --no-cache sqlite
 
 # Add system user
 RUN addgroup --system --gid 1001 nodejs
